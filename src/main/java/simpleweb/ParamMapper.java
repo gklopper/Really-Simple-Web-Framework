@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static simpleweb.Converter.*;
+import static simpleweb.DefaultConverters.*;
 
 public class ParamMapper {
 
@@ -39,12 +39,12 @@ public class ParamMapper {
             if (paramAnnotation == null) {
                 params.add(getDefaultValue(type));
             } else {
-                String stringValue = (String) requestParams.get(paramAnnotation.value());
-                if (stringValue != null) {
                     Converter converter = converters.get(type);
-                    params.add(converter.convert(stringValue));
-                } else {
+                    Object value = converter.convert(paramAnnotation.value(), requestParams);
+                if (value == null && isRawNumber(type)) {
                     params.add(getDefaultValue(type));
+                } else {
+                    params.add(value);    
                 }
             }
         }

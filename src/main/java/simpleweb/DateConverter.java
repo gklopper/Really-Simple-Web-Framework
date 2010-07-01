@@ -3,6 +3,7 @@ package simpleweb;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
+import java.util.Map;
 
 
 public class DateConverter implements Converter{
@@ -18,11 +19,11 @@ public class DateConverter implements Converter{
     }
 
 
-    public Object convert(String param) {
+    public Object convert(String paramName, Map<String, String> parameters) {
         try {
-            return format.parse(param);
+            return format.parse(paramName);
         } catch (ParseException e) {
-            throw new RuntimeException("Could not parse date " + param, e);
+            throw new RuntimeException("Could not parse date " + paramName, e);
         }
     }
 
