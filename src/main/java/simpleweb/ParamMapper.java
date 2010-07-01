@@ -53,4 +53,21 @@ public class ParamMapper {
     public void addConverter(Class clazz, Converter converter) {
         converters.put(clazz, converter);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ParamMapper that = (ParamMapper) o;
+
+        if (converters != null ? !converters.equals(that.converters) : that.converters != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return converters != null ? converters.hashCode() : 0;
+    }
 }

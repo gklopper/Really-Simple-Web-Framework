@@ -70,11 +70,7 @@ public class Dispatcher {
             Map paramMap = new HashMap(request.getParameterMap());
 
             if (hasUrlParams()) {
-                Matcher pathMatcher = pathPattern.matcher(request.getServletPath());
-                pathMatcher.find();
-                for (int x = 1; x <= pathMatcher.groupCount(); x++) {
-                    paramMap.put(urlParameters.get(x - 1), pathMatcher.group(x));
-                }
+                parseUrlParams(request, paramMap);
             }
 
             Object[] params = mapper.mapParams(paramMap, method);
@@ -93,6 +89,14 @@ public class Dispatcher {
             throw new RuntimeException(e);
         } finally {
             controller.destroyForThread();
+        }
+    }
+
+    private void parseUrlParams(HttpServletRequest request, Map paramMap) {
+        Matcher pathMatcher = pathPattern.matcher(request.getServletPath());
+        pathMatcher.find();
+        for (int x = 1; x <= pathMatcher.groupCount(); x++) {
+            paramMap.put(urlParameters.get(x - 1), pathMatcher.group(x));
         }
     }
 
@@ -122,7 +126,7 @@ public class Dispatcher {
             response.sendError(code, message);
         } else {
             // e.g.  404
-            response.sendError(Integer.parseInt(view.replace("error:", "")));
+            response.sendError(Integer.parseInt(errorString));
         }
     }
 
@@ -132,5 +136,31 @@ public class Dispatcher {
 
     public List<String> getUrlParameters() {
         return urlParameters;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Dispatcher that = (Dispatcher) o;
+
+        if (controller != null ? !controller.equals(that.controller) : that.controller != null) return false;
+        if (httpMethod != null ? !httpMethod.equals(that.httpMethod) : that.httpMethod != null) return false;
+        if (mapper != null ? !mapper.equals(that.mapper) : that.mapper != null) return false;
+        if (method != null ? !method.equals(that.method) : that.method != null) return false;
+        if (path != null ? !path.equals(that.path) : that.path != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = mapper != null ? mapper.hashCode() : 0;
+        result = 31 * result + (httpMethod != null ? httpMethod.hashCode() : 0);
+        result = 31 * result + (path != null ? path.hashCode() : 0);
+        result = 31 * result + (controller != null ? controller.hashCode() : 0);
+        result = 31 * result + (method != null ? method.hashCode() : 0);
+        return result;
     }
 }

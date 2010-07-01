@@ -25,4 +25,21 @@ public class DateConverter implements Converter{
             throw new RuntimeException("Could not parse date " + param, e);
         }
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof DateConverter)) return false;
+
+        DateConverter that = (DateConverter) o;
+
+        if (!format.equals(that.format)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return format.hashCode();
+    }
 }

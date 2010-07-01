@@ -5,6 +5,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -15,7 +16,7 @@ public abstract class DispatchFilter implements Filter {
     private final List<Dispatcher> dispatchers = new ArrayList<Dispatcher>();
 
     public void init(FilterConfig filterConfig) throws ServletException {
-        LOGGER.severe("init");
+        LOGGER.info("Initialising config from : " + getClass().getName());
         dispatchers.clear();
         configueControllers();
     }
@@ -26,10 +27,10 @@ public abstract class DispatchFilter implements Filter {
         HttpServletResponse response = (HttpServletResponse) servletResponse;
 
         String path = request.getServletPath();
-        LOGGER.severe("Path: " + path);
+        LOGGER.info("Matching path: " + path);
         for (Dispatcher dispatcher : dispatchers) {
             if (dispatcher.matches(request.getMethod(), path)) {
-                LOGGER.severe("matched");
+                LOGGER.info("Dispatching path : " + path + " to " + dispatcher.getClass().getName());
                 dispatcher.dispatch(request, response);
                 return;
             }
@@ -39,19 +40,49 @@ public abstract class DispatchFilter implements Filter {
     }
 
     public void destroy() {
+        //no implementation
     }
 
     public abstract void configueControllers();
+
+    protected DispatcherBuilder GET(String path) {
+        return new DispatcherBuilder("GET", path, this);
+    }
+
+    protected DispatcherBuilder POST(String path) {
+        return new DispatcherBuilder("POST", path, this);
+    }
+
+    public List<Dispatcher> getDispatchers() {
+        return Collections.unmodifiableList(dispatchers);
+    }
 
     void addDispatcher(Dispatcher dispatcher) {
         dispatchers.add(dispatcher);    
     }
 
-    protected DispatcherChainBuilder GET(String path) {
-        return new DispatcherChainBuilder("GET", path, this);
-    }
+    protected class DispatcherBuilder {
 
-    protected DispatcherChainBuilder POST(String path) {
-        return new DispatcherChainBuilder("POST", path, this);
+        private String httpMethod;
+        private String path;
+        private String method;
+
+
+        DispatcherBuilder(String httpMethod, String path, DispatchFilter dispatchFilter) {
+            this.httpMethod = httpMethod;
+            this.path = path;
+        }
+
+        public DispatcherBuilder invokes(String method) {
+            this.method = method;
+            return this;
+        }
+
+
+        public Dispatcher on(Controller controller) {
+            Dispatcher dispatcher = new Dispatcher(httpMethod, path, controller, method);
+            dispatchers.add(dispatcher);
+            return dispatcher;
+        }
     }
 }
