@@ -55,7 +55,7 @@ public class ParamMapper {
     private Object getDefaultValue(Class paramClass) {
 
         if(isRawNumber(paramClass)) {
-            return 0;
+            return (short)0;
         }
 
         return null;
@@ -65,7 +65,8 @@ public class ParamMapper {
         return paramClass.equals(int.class)
                 || paramClass.equals(long.class)
                 || paramClass.equals(float.class)
-                || paramClass.equals(double.class);
+                || paramClass.equals(double.class)
+                || paramClass.equals(short.class);
     }
 
     private Param getAnnotation(Annotation[] annotations) {

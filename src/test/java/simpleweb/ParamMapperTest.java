@@ -53,7 +53,7 @@ public class ParamMapperTest {
         Object[] paramValues = new ParamMapper().mapParams(params, stubMethod);
 
         Assert.assertEquals(1, paramValues.length);
-        Assert.assertEquals(0, paramValues[0]);
+        Assert.assertEquals((short)0, paramValues[0]);
     }
 
     @Test
@@ -65,7 +65,7 @@ public class ParamMapperTest {
         Object[] paramValues = new ParamMapper().mapParams(params, stubMethod);
 
         Assert.assertEquals(1, paramValues.length);
-        Assert.assertEquals(0, paramValues[0]);
+        Assert.assertEquals((short)0, paramValues[0]);
     }
 
     @Retention(RetentionPolicy.RUNTIME)
