@@ -12,13 +12,17 @@ import static simpleweb.Converter.*;
 public class ParamMapper {
 
     private final Map<Class, Converter> converters = new HashMap<Class, Converter>();
-    
+
     public ParamMapper() {
         addConverter(String.class, STRING_CONVERTER);
         addConverter(Integer.class, INTEGER_CONVERTER);
+        addConverter(int.class, INTEGER_CONVERTER);
         addConverter(Long.class, LONG_CONVERTER);
+        addConverter(long.class, LONG_CONVERTER);
         addConverter(Float.class, FLOAT_CONVERTER);
+        addConverter(float.class, FLOAT_CONVERTER);
         addConverter(Double.class, DOUBLE_CONVERTER);
+        addConverter(double.class, DOUBLE_CONVERTER);
     }
 
 
@@ -31,12 +35,37 @@ public class ParamMapper {
         for (int i = 0; i < types.length; i++) {
             Class type = types[i];
             Param paramAnnotation = getAnnotation(annotations[i]);
-            String stringValue = (String) requestParams.get(paramAnnotation.value());
-            Converter converter = converters.get(type);
-            params.add(converter.convert(stringValue));
+
+            if (paramAnnotation == null) {
+                params.add(getDefaultValue(type));
+            } else {
+                String stringValue = (String) requestParams.get(paramAnnotation.value());
+                if (stringValue != null) {
+                    Converter converter = converters.get(type);
+                    params.add(converter.convert(stringValue));
+                } else {
+                    params.add(getDefaultValue(type));
+                }
+            }
         }
 
         return params.toArray();
+    }
+
+    private Object getDefaultValue(Class paramClass) {
+
+        if(isRawNumber(paramClass)) {
+            return 0;
+        }
+
+        return null;
+    }
+
+    private boolean isRawNumber(Class paramClass) {
+        return paramClass.equals(int.class)
+                || paramClass.equals(long.class)
+                || paramClass.equals(float.class)
+                || paramClass.equals(double.class);
     }
 
     private Param getAnnotation(Annotation[] annotations) {
