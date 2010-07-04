@@ -1,5 +1,6 @@
 package simpleweb;
 
+import javax.servlet.http.HttpServletRequest;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -11,7 +12,7 @@ import static simpleweb.DefaultConverters.*;
 
 public class ParamMapper {
 
-    private final Map<Class, Converter> converters = new HashMap<Class, Converter>();
+    private final Map<Class, SimpleConverter> converters = new HashMap<Class, SimpleConverter>();
 
     public ParamMapper() {
         addConverter(String.class, STRING_CONVERTER);
@@ -26,7 +27,7 @@ public class ParamMapper {
     }
 
 
-    Object[] mapParams(Map requestParams, Method method) {
+    Object[] mapParams(HttpServletRequest request, Map<String, String> urlParams, Method method) {
         List<Object> params = new ArrayList<Object>();
 
         Class[] types = method.getParameterTypes();
@@ -39,8 +40,16 @@ public class ParamMapper {
             if (paramAnnotation == null) {
                 params.add(getDefaultValue(type));
             } else {
-                    Converter converter = converters.get(type);
-                    Object value = converter.convert(paramAnnotation.value(), requestParams);
+                Object value = null;
+                //TODO arrays
+                Object converter = getConverter(type);
+
+                if (converter instanceof SimpleConverter) {
+                   value = ((SimpleConverter)converter).convert(getSimpleValue(paramAnnotation.value(), request, urlParams));    
+                } else {
+                    //TODO complex types
+                }
+
                 if (value == null && isRawNumber(type)) {
                     params.add(getDefaultValue(type));
                 } else {
@@ -50,6 +59,18 @@ public class ParamMapper {
         }
 
         return params.toArray();
+    }
+
+    private String getSimpleValue(String name, HttpServletRequest request, Map<String, String> urlParams) {
+        String value = urlParams.get(name);
+        if (value == null) {
+            value = request.getParameter(name);
+        }
+        return value;
+    }
+
+    private SimpleConverter getConverter(Class type) {
+        return converters.get(type);
     }
 
     private Object getDefaultValue(Class paramClass) {
@@ -80,7 +101,7 @@ public class ParamMapper {
         return null;
     }
 
-    public void addConverter(Class clazz, Converter converter) {
+    public void addConverter(Class clazz, SimpleConverter converter) {
         converters.put(clazz, converter);
     }
 

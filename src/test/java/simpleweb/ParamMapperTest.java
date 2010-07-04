@@ -1,8 +1,12 @@
 package simpleweb;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
+import javax.servlet.http.HttpServletRequest;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -11,46 +15,60 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.mockito.Mockito.when;
+
 public class ParamMapperTest {
+    
+    @Mock private HttpServletRequest request;
+
+    @Before public void before() {
+        MockitoAnnotations.initMocks(this);
+    }
 
     @Test
     public void shouldReturnParamsInCorrectOrder() throws NoSuchMethodException {
-        Method stubMethod = TestClass.class.getMethod("methodOne", String.class, int.class);
+        Method stubMethod = TestClass.class.getMethod("methodOne", String.class, Integer.class, int.class);
 
-        Map<String, String> params = new HashMap<String, String>();
-        params.put("name", "Grant");
-        params.put("id", "5");
+        when(request.getParameter("age")).thenReturn("38");
 
-        Object[] paramValues = new ParamMapper().mapParams(params, stubMethod);
+        Map<String, String> urlParams = new HashMap<String, String>();
+        urlParams.put("name", "Grant");
+        urlParams.put("id", "5");
 
-        Assert.assertEquals(2, paramValues.length);
+        Object[] paramValues = new ParamMapper().mapParams(request, urlParams, stubMethod);
+
+        Assert.assertEquals(3, paramValues.length);
         Assert.assertEquals("Grant", paramValues[0]);
-        Assert.assertEquals(5, paramValues[1]);
+        Assert.assertEquals(38, paramValues[1]);
+        Assert.assertEquals(5, paramValues[2]);
     }
 
     @Test
     public void shouldSetNullIfNoParameterAvailable() throws NoSuchMethodException {
-        Method stubMethod = TestClass.class.getMethod("methodTwo", String.class, int.class, Integer.class);
+        Method stubMethod = TestClass.class.getMethod("methodTwo", String.class, Integer.class, int.class, Integer.class);
 
-        Map<String, String> params = new HashMap<String, String>();
-        params.put("name", "Grant");
-        params.put("id", "5");
+        when(request.getParameter("age")).thenReturn(null);
 
-        Object[] paramValues = new ParamMapper().mapParams(params, stubMethod);
+        Map<String, String> urlParams = new HashMap<String, String>();
+        urlParams.put("name", "Grant");
+        urlParams.put("id", "5");
 
-        Assert.assertEquals(3, paramValues.length);
+        Object[] paramValues = new ParamMapper().mapParams(request, urlParams, stubMethod);
+
+        Assert.assertEquals(4, paramValues.length);
         Assert.assertEquals("Grant", paramValues[0]);
-        Assert.assertEquals(5, paramValues[1]);
-        Assert.assertNull(paramValues[2]);
+        Assert.assertNull(paramValues[1]);
+        Assert.assertEquals(5, paramValues[2]);
+        Assert.assertNull(paramValues[3]);
     }
     
     @Test
     public void shouldSetDefaultForRawTypeIfParameterIsNotAnnotated() throws NoSuchMethodException {
         Method stubMethod = TestClass.class.getMethod("methodFour", int.class);
 
-        Map<String, String> params = new HashMap<String, String>();
+        Map<String, String> urlParams = new HashMap<String, String>();
 
-        Object[] paramValues = new ParamMapper().mapParams(params, stubMethod);
+        Object[] paramValues = new ParamMapper().mapParams(request, urlParams, stubMethod);
 
         Assert.assertEquals(1, paramValues.length);
         Assert.assertEquals((short)0, paramValues[0]);
@@ -60,9 +78,9 @@ public class ParamMapperTest {
     public void shouldSetDefaultForRawTypeIfValueIsNull() throws NoSuchMethodException {
         Method stubMethod = TestClass.class.getMethod("methodFive", int.class);
 
-        Map<String, String> params = new HashMap<String, String>();
+        Map<String, String> urlParams = new HashMap<String, String>();
 
-        Object[] paramValues = new ParamMapper().mapParams(params, stubMethod);
+        Object[] paramValues = new ParamMapper().mapParams(request, urlParams, stubMethod);
 
         Assert.assertEquals(1, paramValues.length);
         Assert.assertEquals((short)0, paramValues[0]);
@@ -75,11 +93,13 @@ public class ParamMapperTest {
     private class TestClass {
 
         public String methodOne(@Param("name")String name,
+                                @Param("age") Integer age,
                                  @TestAnnotation @Param("id") int id) {
             return null;
         }
 
         public String methodTwo(@Param("name")String name,
+                                 @Param("age") Integer age,
                                  @TestAnnotation @Param("id") int id,
                                  @Param("unknown") Integer unknown) {
             return null;

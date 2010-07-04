@@ -1,54 +1,52 @@
 package simpleweb;
 
-import java.util.Map;
-
 class DefaultConverters {
 
     private DefaultConverters(){}
 
-    static final Converter STRING_CONVERTER = new NullSafeConverter(new Converter(){
-        public Object convert(String paramName, Map<String, String> parameters) {
-            return parameters.get(paramName);
+    static final SimpleConverter STRING_CONVERTER = new NullSafeConverter(new SimpleConverter(){
+        public Object convert(String value) {
+            return value;
         }
     });
 
-    static final Converter INTEGER_CONVERTER = new NullSafeConverter(new Converter(){
-        public Object convert(String paramName, Map<String, String> parameters) {
-            return Integer.parseInt(parameters.get(paramName));
+    static final SimpleConverter INTEGER_CONVERTER = new NullSafeConverter(new SimpleConverter(){
+        public Object convert(String value) {
+            return Integer.parseInt(value);
         }
     });
 
-    static final Converter LONG_CONVERTER = new NullSafeConverter(new Converter(){
-        public Object convert(String paramName, Map<String, String> parameters) {
-            return Long.parseLong(parameters.get(paramName));
+    static final SimpleConverter LONG_CONVERTER = new NullSafeConverter(new SimpleConverter(){
+        public Object convert(String value) {
+            return Long.parseLong(value);
         }
     });
 
-    static final Converter FLOAT_CONVERTER = new NullSafeConverter(new Converter(){
-        public Object convert(String paramName, Map<String, String> parameters) {
-            return Float.parseFloat(parameters.get(paramName));
+    static final SimpleConverter FLOAT_CONVERTER = new NullSafeConverter(new SimpleConverter(){
+        public Object convert(String value) {
+            return Float.parseFloat(value);
         }
     });
 
-    static final Converter DOUBLE_CONVERTER = new NullSafeConverter(new Converter(){
-        public Object convert(String paramName, Map<String, String> parameters) {
-            return Double.parseDouble(parameters.get(paramName));
+    static final SimpleConverter DOUBLE_CONVERTER = new NullSafeConverter(new SimpleConverter(){
+        public Object convert(String value) {
+            return Double.parseDouble(value);
         }
     });
 
-    private static class NullSafeConverter implements Converter {
-        private Converter delegate;
+    private static class NullSafeConverter implements SimpleConverter {
+        private SimpleConverter delegate;
 
-        private NullSafeConverter(Converter delegate) {
+        private NullSafeConverter(SimpleConverter delegate) {
             this.delegate = delegate;
         }
 
         @Override
-        public Object convert(String paramName, Map<String, String> parameters) {
-            if (parameters.get(paramName) == null) {
+        public Object convert(String value) {
+            if (value == null) {
                 return null;
             }
-            return delegate.convert(paramName, parameters);  
+            return delegate.convert(value);
         }
     }
 

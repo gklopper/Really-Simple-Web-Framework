@@ -42,7 +42,7 @@ public class DispatchFilterTest {
         };
         filter.init(null);
 
-        when(request.getServletPath()).thenReturn("/hello");
+        when(request.getRequestURI()).thenReturn("/hello");
         when(request.getMethod()).thenReturn("GET");
         when(firstDispatcher.matches("GET", "/hello")).thenReturn(false);
         when(secondDispatcher.matches("GET", "/hello")).thenReturn(true);
@@ -65,7 +65,7 @@ public class DispatchFilterTest {
         };
         filter.init(null);
 
-        when(request.getServletPath()).thenReturn("/hello");
+        when(request.getRequestURI()).thenReturn("/hello");
         when(request.getMethod()).thenReturn("GET");
         when(firstDispatcher.matches("GET", "/hello")).thenReturn(false);
         when(secondDispatcher.matches("GET", "/hello")).thenReturn(false);

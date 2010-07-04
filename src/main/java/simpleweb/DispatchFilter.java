@@ -1,5 +1,7 @@
 package simpleweb;
 
+import org.apache.log4j.Logger;
+
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -7,11 +9,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Logger;
+
 
 
 public abstract class DispatchFilter implements Filter {
-    private static final Logger LOGGER = Logger.getLogger(DispatchFilter.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(DispatchFilter.class);
 
     private final List<Dispatcher> dispatchers = new ArrayList<Dispatcher>();
 
@@ -26,11 +28,10 @@ public abstract class DispatchFilter implements Filter {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
 
-        String path = request.getServletPath();
-        LOGGER.info("Matching path: " + path);
+        String path = request.getRequestURI();
+        LOGGER.debug("Matching path: " + path);
         for (Dispatcher dispatcher : dispatchers) {
             if (dispatcher.matches(request.getMethod(), path)) {
-                LOGGER.info("Dispatching path : " + path + " to " + dispatcher.getClass().getName());
                 dispatcher.dispatch(request, response);
                 return;
             }
@@ -58,6 +59,7 @@ public abstract class DispatchFilter implements Filter {
     }
 
     void addDispatcher(Dispatcher dispatcher) {
+        LOGGER.info("Adding dispatcher: " + dispatcher.toString());
         dispatchers.add(dispatcher);    
     }
 
