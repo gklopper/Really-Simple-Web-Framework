@@ -91,7 +91,6 @@ public class Dispatcher {
 
     private void mapModelToRequest(HttpServletRequest request) {
         Map<String, Object> model = controller.getModel();
-
         for (String key : model.keySet()) {
             request.setAttribute(key, model.get(key));
         }
@@ -118,11 +117,13 @@ public class Dispatcher {
         if (method == null) {
             throw new IllegalStateException("Method " + methodName + " (MUST return a String) not found in class " + this.controller.getClass().getName());
         }
+        LOGGER.info("Method: " + method);
         return method;
     }
 
     private Pattern setupPathRegex(String path) {
         String regex = path.replace("*", ".*").replaceAll("\\{[a-zA-Z0-9]*\\}", "(.*)");
+        LOGGER.info("Path: " + path + " = Regex: " + regex);
         return Pattern.compile(regex);
     }
 
