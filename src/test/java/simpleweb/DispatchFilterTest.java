@@ -90,10 +90,9 @@ public class DispatchFilterTest {
 
         filter.init(null);
 
-        Dispatcher expected = new Dispatcher("POST", "/admin/save", testController, "save");
-
         Assert.assertEquals(1, filter.getDispatchers().size());
-        Assert.assertEquals(expected, filter.getDispatchers().get(0));
+        Assert.assertEquals("POST", filter.getDispatchers().get(0).getHttpMethod());
+        Assert.assertEquals("/admin/save", filter.getDispatchers().get(0).getPath());
         
     }
 
@@ -112,11 +111,9 @@ public class DispatchFilterTest {
 
         filter.init(null);
 
-        Dispatcher expected = new Dispatcher("GET", "/admin/edit/{id}", testController, "save");
-
         Assert.assertEquals(1, filter.getDispatchers().size());
-        Assert.assertEquals(expected, filter.getDispatchers().get(0));
-
+        Assert.assertEquals("GET", filter.getDispatchers().get(0).getHttpMethod());
+        Assert.assertEquals("/admin/edit/{id}", filter.getDispatchers().get(0).getPath());
     }
 
     public class TestController extends Controller {

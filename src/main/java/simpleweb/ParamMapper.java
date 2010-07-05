@@ -1,5 +1,8 @@
 package simpleweb;
 
+import simpleweb.converter.ComplexConverter;
+import simpleweb.converter.SimpleConverter;
+
 import javax.servlet.http.HttpServletRequest;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -8,11 +11,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static simpleweb.DefaultConverters.*;
+import static simpleweb.converter.DefaultConverters.*;
 
 public class ParamMapper {
 
-    private final Map<Class, SimpleConverter> converters = new HashMap<Class, SimpleConverter>();
+    private final Map<Class, Object> converters = new HashMap<Class, Object>();
 
     public ParamMapper() {
         addConverter(String.class, STRING_CONVERTER);
@@ -42,12 +45,12 @@ public class ParamMapper {
             } else {
                 Object value = null;
                 //TODO arrays
-                Object converter = getConverter(type);
+                Object converter = converters.get(type);
 
                 if (converter instanceof SimpleConverter) {
-                   value = ((SimpleConverter)converter).convert(getSimpleValue(paramAnnotation.value(), request, urlParams));    
-                } else {
-                    //TODO complex types
+                   value = ((SimpleConverter)converter).convert(getSimpleValue(paramAnnotation.value(), request, urlParams));
+                } else if (converter instanceof ComplexConverter){
+                   value = ((ComplexConverter)converter).convert(paramAnnotation.value(), request, urlParams);
                 }
 
                 if (value == null && isRawNumber(type)) {
@@ -67,10 +70,6 @@ public class ParamMapper {
             value = request.getParameter(name);
         }
         return value;
-    }
-
-    private SimpleConverter getConverter(Class type) {
-        return converters.get(type);
     }
 
     private Object getDefaultValue(Class paramClass) {
@@ -105,20 +104,7 @@ public class ParamMapper {
         converters.put(clazz, converter);
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        ParamMapper that = (ParamMapper) o;
-
-        if (converters != null ? !converters.equals(that.converters) : that.converters != null) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        return converters != null ? converters.hashCode() : 0;
+    public void addConverter(Class clazz, ComplexConverter converter) {
+        converters.put(clazz, converter);
     }
 }

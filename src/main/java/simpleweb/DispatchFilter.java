@@ -29,7 +29,7 @@ public abstract class DispatchFilter implements Filter {
         HttpServletResponse response = (HttpServletResponse) servletResponse;
 
         String path = request.getRequestURI();
-        LOGGER.debug("Matching path: " + path);
+        LOGGER.debug("Matching path: " + request.getMethod() + ":" + path);
         for (Dispatcher dispatcher : dispatchers) {
             if (dispatcher.matches(request.getMethod(), path)) {
                 dispatcher.dispatch(request, response);

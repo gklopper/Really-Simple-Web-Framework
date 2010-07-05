@@ -1,4 +1,4 @@
-package simpleweb;
+package simpleweb.converter;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

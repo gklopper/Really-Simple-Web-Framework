@@ -27,6 +27,10 @@ public abstract class Controller {
         return model.get();
     }
 
+    protected void cachePublicFor(int seconds) {
+        getResponse().setHeader("Cache-Control", String.format("public, max-age=%s", seconds));
+    }
+
     protected void addToModel(String name, Object value) {
         model.get().put(name, value);
     }
